@@ -25,13 +25,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-// Typography & Palette
+// Typography & Formatting
 const FONT_FAMILY = 'Times New Roman';
 const COLOR_BLACK = '000000';
-const COLOR_PRIMARY = '0A2540'; // Deep Navy
-const COLOR_SECONDARY = '0066CC'; // Ocean Blue
+const COLOR_PRIMARY = '0A2540';
+const COLOR_SECONDARY = '0066CC';
 const COLOR_TEXT = '222222';
-const COLOR_BG_LIGHT = 'F7FAFC';
 const COLOR_BORDER = 'CCCCCC';
 
 function p(text, options = {}) {
@@ -41,31 +40,13 @@ function p(text, options = {}) {
     children: [
       new TextRun({
         text,
-        size: options.size || 24, // 12pt default
+        size: options.size || 24, // 12pt
         color: options.color || COLOR_TEXT,
         bold: options.bold || false,
         italics: options.italics || false,
         font: FONT_FAMILY,
       }),
     ],
-  });
-}
-
-function pMulti(runs, options = {}) {
-  return new Paragraph({
-    alignment: options.align || AlignmentType.LEFT,
-    spacing: { before: options.before ?? 80, after: options.after ?? 80, line: options.line ?? 276 },
-    children: runs.map(
-      (r) =>
-        new TextRun({
-          text: r.text,
-          size: r.size || options.size || 24,
-          color: r.color || options.color || COLOR_TEXT,
-          bold: r.bold || false,
-          italics: r.italics || false,
-          font: FONT_FAMILY,
-        })
-    ),
   });
 }
 
@@ -97,23 +78,6 @@ function heading2(text) {
         color: COLOR_BLACK,
         bold: true,
         size: 28, // 14pt
-        font: FONT_FAMILY,
-      }),
-    ],
-  });
-}
-
-function heading3(text) {
-  return new Paragraph({
-    heading: HeadingLevel.HEADING_3,
-    spacing: { before: 180, after: 100 },
-    alignment: AlignmentType.LEFT,
-    children: [
-      new TextRun({
-        text,
-        color: COLOR_BLACK,
-        bold: true,
-        size: 24, // 12pt
         font: FONT_FAMILY,
       }),
     ],
@@ -265,7 +229,7 @@ function callout(title, lines) {
 }
 
 async function buildAcademicDocx() {
-  console.log('🏛️ Generating Academic Project Report matching SRM B.Tech Specification...');
+  console.log('🏛️ Generating Single-Student Academic Project Report (Sahil Moghaiz - 21CSE463T)...');
 
   const imgPath = path.join(rootDir, 'docs/aws_architecture_diagram.png');
   let imageRun = null;
@@ -282,14 +246,14 @@ async function buildAcademicDocx() {
   }
 
   const doc = new Document({
-    creator: 'Sahil Moghaiz, Tanmay Shrivastava, Nishchal Mahant',
+    creator: 'Sahil Moghaiz',
     title: 'Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education',
-    description: 'B.Tech CSE Cloud Computing Final Project Report (21CSP302L)',
+    description: '21CSE463T Cloud Strategy Planning and Management Project Report - Sahil Moghaiz [RA2311028010062]',
     sections: [
       {
         properties: {
           page: {
-            margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 }, // 1 inch
+            margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 },
           },
         },
         headers: {
@@ -299,7 +263,7 @@ async function buildAcademicDocx() {
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({
-                    text: 'Presently: AWS Serverless AI Attendance Platform | 21CSP302L',
+                    text: 'Presently: AWS Serverless AI Attendance Platform | 21CSE463T',
                     size: 18,
                     color: '666666',
                     font: FONT_FAMILY,
@@ -339,20 +303,25 @@ async function buildAcademicDocx() {
           p('Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education', {
             align: AlignmentType.CENTER,
             bold: true,
-            size: 32, // 16pt
+            size: 32,
             before: 200,
             after: 160,
           }),
-          p('21CSP302L - PROJECT', { align: AlignmentType.CENTER, bold: true, size: 26, after: 160 }),
-          p('Submitted by', { align: AlignmentType.CENTER, italics: true, size: 24, after: 120 }),
-          p('Sahil Moghaiz [RA2311028010062]\nTanmay Shrivastava [RA2311028010082]\nNishchal Mahant [RA2311028010077]', {
+          p('21CSE463T - CLOUD STRATEGY PLANNING AND MANAGEMENT\nPROJECT REPORT', {
             align: AlignmentType.CENTER,
             bold: true,
             size: 26,
-            after: 200,
+            after: 160,
+          }),
+          p('Submitted by', { align: AlignmentType.CENTER, italics: true, size: 24, after: 120 }),
+          p('Sahil Moghaiz [RA2311028010062]', {
+            align: AlignmentType.CENTER,
+            bold: true,
+            size: 28,
+            after: 220,
           }),
           p('Under the Guidance of', { align: AlignmentType.CENTER, italics: true, size: 24, after: 80 }),
-          p('Dr S Benisha\nAssistant Professor', { align: AlignmentType.CENTER, bold: true, size: 26, after: 200 }),
+          p('Dr. S. Prabakeran\nProfessor', { align: AlignmentType.CENTER, bold: true, size: 26, after: 220 }),
           p('in partial fulfillment of the requirements for the degree of', {
             align: AlignmentType.CENTER,
             italics: true,
@@ -389,26 +358,27 @@ async function buildAcademicDocx() {
           createStyledTable(
             ['Field', 'Details'],
             [
-              ['Degree / Course', 'B.TECH. CSE CLOUD COMPUTING (21CSP302L)'],
-              ['Student Names', 'Sahil Moghaiz, Tanmay Shrivastava, Nishchal Mahant'],
-              ['Registration Numbers', 'RA2311028010062, RA2311028010082, RA2311028010077'],
+              ['Degree / Course', 'B.TECH. CSE CLOUD COMPUTING'],
+              ['Subject & Code', 'Cloud Strategy Planning and Management (21CSE463T)'],
+              ['Student Name', 'Sahil Moghaiz'],
+              ['Registration Number', 'RA2311028010062'],
               ['Title of Work', 'Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education'],
             ]
           ),
-          p('We hereby certify that this assessment complies with the University’s Rules and Regulations relating to Academic misconduct and plagiarism, as listed in the University Website, Regulations, and the Education Committee guidelines.', {
+          p('I hereby certify that this assessment complies with the University’s Rules and Regulations relating to Academic misconduct and plagiarism, as listed in the University Website, Regulations, and the Education Committee guidelines.', {
             size: 22,
             before: 120,
             after: 80,
           }),
-          p('We confirm that all the work contained in this assessment is our own except where indicated, and that We have met the following conditions:', {
+          p('I confirm that all the work contained in this assessment is my own except where indicated, and that I have met the following conditions:', {
             size: 22,
             after: 60,
           }),
           bullet('Clearly referenced / listed all sources as appropriate'),
-          bullet('Referenced and put in quotation marks all quoted text (from documentation, papers, etc.)'),
+          bullet('Referenced and put in quotation marks all quoted text (from documentation, research papers, etc.)'),
           bullet('Given the sources of all architectural diagrams, data, and code that are not my own'),
           bullet('Not made any unauthorized use of the report(s) of any other student(s) either past or present'),
-          bullet('Acknowledged in appropriate places any help that I have received from others (supervisors, external sources)'),
+          bullet('Acknowledged in appropriate places any help that I have received from others (supervisor, external sources)'),
           bullet('Compiled with any other criteria specified in the Course handbook / University website'),
           p('I understand that any false claim for this work will be penalized in accordance with the University policies and regulations.', {
             size: 22,
@@ -416,9 +386,9 @@ async function buildAcademicDocx() {
             after: 80,
           }),
           callout('DECLARATION', [
-            'I am aware of and understand the University’s policy on Academic misconduct and plagiarism and I certify that this assessment is my / our own work, except where indicated by referring, and that I have followed the good academic practices noted above.',
+            'I am aware of and understand the University’s policy on Academic misconduct and plagiarism and I certify that this assessment is my own work, except where indicated by referring, and that I have followed the good academic practices noted above.',
             '',
-            'Sahil Moghaiz (RA2311028010062)          Tanmay Shrivastava (RA2311028010082)          Nishchal Mahant (RA2311028010077)',
+            'Student Signature: _______________________          Name: Sahil Moghaiz [RA2311028010062]',
             'Date: May 15, 2026',
           ]),
 
@@ -438,14 +408,14 @@ async function buildAcademicDocx() {
             after: 200,
           }),
           p(
-            'Certified that 21CSP302L - Project report titled “Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education” is the bonafide work of “Sahil Moghaiz [RA2311028010062], Tanmay Shrivastava [RA2311028010082], Nishchal Mahant [RA2311028010077]” who carried out the project work under my supervision. Certified further, that to the best of my knowledge the work reported herein does not form any other project report or dissertation on the basis of which a degree or award was conferred on an earlier occasion on this or any other candidate.',
+            'Certified that the 21CSE463T - Project report titled “Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education” is the bonafide work of “Sahil Moghaiz [RA2311028010062]” who carried out the project work under my supervision for the course Cloud Strategy Planning and Management. Certified further, that to the best of my knowledge the work reported herein does not form any other project report or dissertation on the basis of which a degree or award was conferred on an earlier occasion on this or any other candidate.',
             { size: 24, after: 300, line: 360 }
           ),
           createStyledTable(
-            ['Supervisor', 'Head of Department'],
+            ['Supervisor / Faculty In-Charge', 'Head of Department'],
             [
               [
-                'Dr. S Benisha\nSUPERVISOR\nAssistant Professor\nDEPARTMENT OF NETWORKING AND COMMUNICATION',
+                'Dr. S. Prabakeran\nSUPERVISOR\nProfessor\nDEPARTMENT OF NETWORKING AND COMMUNICATION',
                 'DR. M. LAKSHMI\nPROFESSOR & HEAD\nDEPARTMENT OF NETWORKING AND COMMUNICATION',
               ],
             ]
@@ -465,15 +435,15 @@ async function buildAcademicDocx() {
             size: 28,
             after: 200,
           }),
-          p('We express our humble gratitude to Dr. C. Muthamizhchelvan, Vice-Chancellor, SRM Institute of Science and Technology, for the facilities extended for the project work and his continued support.', { size: 24, after: 120, line: 300 }),
-          p('We extend our sincere thanks to Dr. Leenus Jesu Martin M, Dean-CET, SRM Institute of Science and Technology, for his invaluable support.', { size: 24, after: 120, line: 300 }),
-          p('We wish to thank Dr. Revathi Venkataraman, Professor and Chairperson, School of Computing, SRM Institute of Science and Technology, for her support throughout the project work.', { size: 24, after: 120, line: 300 }),
-          p('We encompass our sincere thanks to Dr. M. Pushpalatha, Professor and Associate Chairperson - CS, and Dr. C. Lakshmi, Professor and Associate Chairperson - AI, School of Computing, SRM Institute of Science and Technology, for their invaluable support.', { size: 24, after: 120, line: 300 }),
-          p('We are incredibly grateful to our Head of the Department, Dr. M. Lakshmi, Department of Networking and Communications, SRM Institute of Science and Technology, for her suggestions and encouragement at all the stages of the project work.', { size: 24, after: 120, line: 300 }),
-          p('We register our immeasurable thanks to our Faculty Advisor, Dr. Lakshmi Dhevi B, Department of Networking and Communications, SRM Institute of Science and Technology, for leading and helping us to complete our course.', { size: 24, after: 120, line: 300 }),
-          p('Our inexpressible respect and thanks to our guide, Dr. S. Benisha, Department of Networking and Communications, SRM Institute of Science and Technology, for providing us with an opportunity to pursue our project under her mentorship. Her passion for solving problems and making a difference in the cloud computing domain has always been inspiring.', { size: 24, after: 120, line: 300 }),
-          p('Finally, we would like to thank our parents, family members, and friends for their unconditional love, constant support, and encouragement.', { size: 24, after: 200, line: 300 }),
-          p('Sahil Moghaiz [RA2311028010062]\nTanmay Shrivastava [RA2311028010082]\nNishchal Mahant [RA2311028010077]', { align: AlignmentType.RIGHT, bold: true, size: 24 }),
+          p('I express my humble gratitude to Dr. C. Muthamizhchelvan, Vice-Chancellor, SRM Institute of Science and Technology, for the facilities extended for the project work and his continued support.', { size: 24, after: 120, line: 300 }),
+          p('I extend my sincere thanks to Dr. Leenus Jesu Martin M, Dean-CET, SRM Institute of Science and Technology, for his invaluable support.', { size: 24, after: 120, line: 300 }),
+          p('I wish to thank Dr. Revathi Venkataraman, Professor and Chairperson, School of Computing, SRM Institute of Science and Technology, for her support throughout the project work.', { size: 24, after: 120, line: 300 }),
+          p('I encompass my sincere thanks to Dr. M. Pushpalatha, Professor and Associate Chairperson - CS, and Dr. C. Lakshmi, Professor and Associate Chairperson - AI, School of Computing, SRM Institute of Science and Technology, for their invaluable support.', { size: 24, after: 120, line: 300 }),
+          p('I am incredibly grateful to our Head of the Department, Dr. M. Lakshmi, Department of Networking and Communications, SRM Institute of Science and Technology, for her suggestions and encouragement at all the stages of the project work.', { size: 24, after: 120, line: 300 }),
+          p('I register my immeasurable thanks to our Faculty Advisor, Dr. Lakshmi Dhevi B, Department of Networking and Communications, SRM Institute of Science and Technology, for leading and helping me to complete my course.', { size: 24, after: 120, line: 300 }),
+          p('My inexpressible respect and deepest gratitude to my guide, Dr. S. Prabakeran, Professor, Department of Networking and Communications, SRM Institute of Science and Technology, for providing me with an opportunity to pursue my project under his mentorship in Cloud Strategy Planning and Management (21CSE463T). His passion for cloud architectural design, serverless systems, and problem-solving has always been inspiring.', { size: 24, after: 120, line: 300 }),
+          p('Finally, I would like to thank my parents, family members, and friends for their unconditional love, constant support, and encouragement.', { size: 24, after: 200, line: 300 }),
+          p('Sahil Moghaiz [RA2311028010062]', { align: AlignmentType.RIGHT, bold: true, size: 26 }),
 
           new Paragraph({ children: [new PageBreak()] }),
 
@@ -485,7 +455,7 @@ async function buildAcademicDocx() {
             after: 200,
           }),
           p(
-            'The Presently system is an AI-driven, cloud-native facial recognition attendance and classroom management platform designed specifically for higher education institutions. The primary objective is to deliver an automated, proxy-proof biometric attendance tracking mechanism paired with master timetable scheduling and automated faculty notifications, completely operating within AWS Free Tier infrastructure provisioned via Terraform.',
+            'The Presently system is an AI-driven, cloud-native facial recognition attendance and classroom management platform designed specifically for higher education institutions. Submitted as the core project requirement for Cloud Strategy Planning and Management (21CSE463T), the primary objective is to deliver an automated, proxy-proof biometric attendance tracking mechanism paired with master timetable scheduling and automated faculty notifications, completely operating within AWS Free Tier infrastructure provisioned via Terraform.',
             { size: 24, after: 120, line: 300 }
           ),
           p(
@@ -496,7 +466,7 @@ async function buildAcademicDocx() {
             'Empirical API testing across 20 test cases demonstrates system reliability with 18 of 20 tests passing (90% pass rate). The platform aligns with United Nations Sustainable Development Goal 8 (Decent Work and Economic Growth) and SDG 4 (Quality Education) by optimizing institutional administration, eliminating paper-based inefficiencies, and ensuring transparent academic compliance.',
             { size: 24, after: 160, line: 300 }
           ),
-          p('Index Terms—Biometric Attendance, Facial Recognition, Amazon Rekognition, AWS Lambda, DynamoDB, Serverless Computing, Amazon Cognito, CloudFront, Terraform, Higher Education, Node.js, Python.', {
+          p('Index Terms—Cloud Strategy, Biometric Attendance, Facial Recognition, Amazon Rekognition, AWS Lambda, DynamoDB, Serverless Computing, Amazon Cognito, CloudFront, Terraform, 21CSE463T, Node.js, Python.', {
             bold: true,
             italics: true,
             size: 22,
@@ -521,7 +491,7 @@ async function buildAcademicDocx() {
               ['1', 'Introduction', '1'],
               ['1.1', 'Introduction to Project', '1'],
               ['1.2', 'Problem Statement', '2'],
-              ['1.3', 'Motivation', '3'],
+              ['1.3', 'Motivation & Cloud Strategy Alignment', '3'],
               ['1.4', 'Sustainable Development Goals', '4'],
               ['2', 'Literature Survey', '5'],
               ['2.1', 'Overview of Attendance Tracking Systems', '5'],
@@ -615,6 +585,7 @@ async function buildAcademicDocx() {
               ['CDN', 'Content Delivery Network'],
               ['CNN', 'Convolutional Neural Network'],
               ['CORS', 'Cross-Origin Resource Sharing'],
+              ['CSPM', 'Cloud Strategy Planning and Management (21CSE463T)'],
               ['DDB', 'Amazon DynamoDB (NoSQL Database)'],
               ['HTML5', 'HyperText Markup Language 5'],
               ['HTTPS', 'Hypertext Transfer Protocol Secure'],
@@ -640,7 +611,7 @@ async function buildAcademicDocx() {
           heading1('CHAPTER 1: INTRODUCTION'),
           heading2('1.1 Introduction to Project'),
           p(
-            'Presently is a production-ready, cloud-native biometric attendance and classroom management platform architected exclusively for higher education institutions. The system combines modern serverless cloud engineering with computer vision AI to automate classroom management, eliminate proxy attendance, and streamline faculty administrative workflows.',
+            'Presently is a production-ready, cloud-native biometric attendance and classroom management platform architected for higher education institutions as part of the Cloud Strategy Planning and Management course (21CSE463T). The system combines modern serverless cloud engineering with computer vision AI to automate classroom management, eliminate proxy attendance, and streamline faculty administrative workflows.',
             { line: 300 }
           ),
           p(
@@ -668,9 +639,9 @@ async function buildAcademicDocx() {
             { line: 300 }
           ),
 
-          heading2('1.3 Motivation'),
+          heading2('1.3 Motivation & Cloud Strategy Alignment'),
           p(
-            'The motivation behind Presently is to engineer an accessible, hardware-free, zero-idle-cost attendance management platform utilizing modern serverless cloud infrastructure and browser-native computer vision. By leveraging Amazon Rekognition’s cloud-scale neural vision models directly from standard webcams and laptops, educational institutions can enforce strict biometric verification without purchasing proprietary hardware.',
+            'In alignment with the curriculum of Cloud Strategy Planning and Management (21CSE463T), Presently demonstrates how a modern cloud strategy can replace capital-intensive on-premise hardware with elastic, cost-optimized serverless architectures. By leveraging Amazon Rekognition’s cloud-scale neural vision models directly from standard webcams and laptops, educational institutions can enforce strict biometric verification without purchasing proprietary hardware.',
             { line: 300 }
           ),
 
@@ -873,7 +844,7 @@ async function buildAcademicDocx() {
           heading1('CHAPTER 7: CONCLUSION AND FUTURE WORK'),
           heading2('7.1 Conclusion'),
           p(
-            'This report presented Presently, an AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform engineered for higher education. By unifying Amazon Rekognition, AWS Lambda, DynamoDB, Cognito, and CloudFront with Terraform IaC, the platform successfully solves the challenges of proxy attendance, administrative overhead, and high hardware costs while operating at zero idle cost on AWS Free Tier.',
+            'This report presented Presently, an AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform engineered for higher education and submitted for Cloud Strategy Planning and Management (21CSE463T). By unifying Amazon Rekognition, AWS Lambda, DynamoDB, Cognito, and CloudFront with Terraform IaC, the platform successfully solves the challenges of proxy attendance, administrative overhead, and high hardware costs while operating at zero idle cost on AWS Free Tier.',
             { line: 300 }
           ),
 
@@ -898,13 +869,11 @@ async function buildAcademicDocx() {
           // ==================== APPENDIX A: DECLARATION ====================
           heading1('APPENDIX A: DECLARATION'),
           p(
-            'We hereby declare that this project report titled “Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education” has been carried out by us in partial fulfillment of the requirements for the award of the degree of Bachelor of Technology in Computer Science and Engineering at SRM Institute of Science and Technology, Kattankulathur, Tamil Nadu, India.',
+            'I hereby declare that this project report titled “Presently: An AWS Serverless AI Facial Recognition Attendance and Classroom Management Platform for Higher Education” has been carried out by me in partial fulfillment of the requirements for the course Cloud Strategy Planning and Management (21CSE463T) for the award of the degree of Bachelor of Technology in Computer Science and Engineering at SRM Institute of Science and Technology, Kattankulathur, Tamil Nadu, India.',
             { line: 300, after: 200 }
           ),
-          p('Student 1 Signature: ___________________\nName: Sahil Moghaiz\nReg. No.: RA2311028010062\nDate: May 15, 2026', { size: 24, after: 160 }),
-          p('Student 2 Signature: ___________________\nName: Tanmay Shrivastava\nReg. No.: RA2311028010082\nDate: May 15, 2026', { size: 24, after: 160 }),
-          p('Student 3 Signature: ___________________\nName: Nishchal Mahant\nReg. No.: RA2311028010077\nDate: May 15, 2026', { size: 24, after: 200 }),
-          p('Guide Signature: ___________________________\nName: Dr. S. Benisha\nDesignation: Assistant Professor, Department of Networking and Communication\nDate: May 15, 2026', { size: 24, after: 100 }),
+          p('Student Signature: ___________________\nName: Sahil Moghaiz\nReg. No.: RA2311028010062\nDate: May 15, 2026', { size: 24, after: 200 }),
+          p('Guide Signature: ___________________________\nName: Dr. S. Prabakeran\nDesignation: Professor, Department of Networking and Communication\nDate: May 15, 2026', { size: 24, after: 100 }),
         ],
       },
     ],
@@ -915,7 +884,7 @@ async function buildAcademicDocx() {
   const outPath2 = path.join(rootDir, 'Attendance_System_VibeCoding_Project_Report.docx');
   fs.writeFileSync(outPath1, buffer);
   fs.writeFileSync(outPath2, buffer);
-  console.log(`✅ Academic Project Report generated successfully matching reference PDF!`);
+  console.log(`✅ Single-Student Academic Project Report generated successfully!`);
   console.log(`📁 File 1: ${outPath1}`);
   console.log(`📁 File 2: ${outPath2}`);
 }
