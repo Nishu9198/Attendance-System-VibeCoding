@@ -28,5 +28,7 @@ __pycache__/
 *.swo
 .DS_Store
 
-# OS
+# OS & Office Temp Files
 Thumbs.db
+~$*
+*.tmp
