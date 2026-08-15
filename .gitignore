@@ -1,0 +1,32 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+.terraform.lock.hcl
+lambda_package.zip
+crash.log
+override.tf
+override.tf.json
+
+# Node
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+Thumbs.db
