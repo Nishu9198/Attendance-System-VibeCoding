@@ -27,34 +27,19 @@ export default function StudentRosterPage() {
         api.getStudents().catch(() => ({ students: [] })),
       ]);
 
-      let list = subjData.subjects || [];
-      if (list.length === 0) {
-        list = [
-          { subjectCode: 'CS501', subjectName: 'Cloud Computing & AWS', className: '5th Year', section: 'A', threshold: 75 },
-          { subjectCode: 'CS502', subjectName: 'Deep Learning & AI', className: '5th Year', section: 'A', threshold: 75 },
-          { subjectCode: 'CS503', subjectName: 'Distributed Systems', className: '5th Year', section: 'B', threshold: 80 },
-        ];
-      }
+      const list = subjData.subjects || [];
       setSubjects(list);
 
-      let studList = studData.students || [];
-      if (studList.length === 0) {
-        studList = [
-          { studentId: 'STU001', name: 'Aarav Sharma', rollNumber: '21CS001', email: 'aarav@university.edu' },
-          { studentId: 'STU002', name: 'Priya Patel', rollNumber: '21CS002', email: 'priya@university.edu' },
-          { studentId: 'STU003', name: 'Rahul Kumar', rollNumber: '21CS003', email: 'rahul@university.edu' },
-          { studentId: 'STU004', name: 'Sneha Gupta', rollNumber: '21CS004', email: 'sneha@university.edu' },
-          { studentId: 'STU005', name: 'Vikram Singh', rollNumber: '21CS005', email: 'vikram@university.edu' },
-          { studentId: 'STU006', name: 'Ananya Reddy', rollNumber: '21CS006', email: 'ananya@university.edu' },
-          { studentId: 'STU007', name: 'Karthik Nair', rollNumber: '21CS007', email: 'karthik@university.edu' },
-          { studentId: 'STU008', name: 'Divya Menon', rollNumber: '21CS008', email: 'divya@university.edu' },
-        ];
-      }
+      const studList = studData.students || [];
       setStudents(studList);
 
-      const code = list[0]?.subjectCode || 'CS501';
-      setSelectedSubjectCode(code);
-      fetchRosterForSubject(code, list, studList);
+      if (list.length > 0) {
+        const code = list[0].subjectCode;
+        setSelectedSubjectCode(code);
+        fetchRosterForSubject(code, list, studList);
+      } else {
+        setRosterData({ threshold: 75, roster: [] });
+      }
     } catch (err) {
       console.error('Error loading subjects:', err);
     } finally {
@@ -73,18 +58,13 @@ export default function StudentRosterPage() {
       if (data && data.roster && data.roster.length > 0) {
         setRosterData(data);
       } else {
-        const fallbackStudents = studList.length > 0 ? studList : [
-          { studentId: 'STU001', name: 'Aarav Sharma', rollNumber: '21CS001' },
-          { studentId: 'STU002', name: 'Priya Patel', rollNumber: '21CS002' },
-          { studentId: 'STU003', name: 'Rahul Kumar', rollNumber: '21CS003' },
-          { studentId: 'STU004', name: 'Sneha Gupta', rollNumber: '21CS004' },
-          { studentId: 'STU005', name: 'Vikram Singh', rollNumber: '21CS005' },
-          { studentId: 'STU006', name: 'Ananya Reddy', rollNumber: '21CS006' },
-          { studentId: 'STU007', name: 'Karthik Nair', rollNumber: '21CS007' },
-          { studentId: 'STU008', name: 'Divya Menon', rollNumber: '21CS008' },
-        ];
+        // Enrolled students in this subject
+        const enrolledIds = subj?.enrolledStudents || [];
+        const enrolledStudents = studList.filter(s =>
+          enrolledIds.includes(s.studentId) || enrolledIds.includes(s.rollNumber)
+        );
 
-        const defaultRoster = fallbackStudents.map((s) => ({
+        const defaultRoster = enrolledStudents.map((s) => ({
           studentId: s.studentId,
           present: 0,
           absent: 0,
@@ -138,6 +118,58 @@ export default function StudentRosterPage() {
     document.body.removeChild(link);
   }
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentEmail, setNewStudentEmail] = useState('');
+  const [newStudentRoll, setNewStudentRoll] = useState('');
+  const [newStudentSection, setNewStudentSection] = useState('A');
+  const [newStudentDept, setNewStudentDept] = useState('Computer Science');
+  const [newStudentSubjects, setNewStudentSubjects] = useState([]);
+  const [addingStudent, setAddingStudent] = useState(false);
+
+  function openAddStudentModal() {
+    setNewStudentName('');
+    setNewStudentEmail('');
+    setNewStudentRoll(`21CS${Math.floor(100 + Math.random() * 900)}`);
+    setNewStudentSection('A');
+    setNewStudentDept('Computer Science');
+    setNewStudentSubjects([selectedSubjectCode]);
+    setShowAddModal(true);
+  }
+
+  async function handleCreateStudent(e) {
+    e.preventDefault();
+    if (!newStudentName.trim() || !newStudentEmail.trim() || !newStudentRoll.trim()) {
+      alert('Please fill in student name, email, and roll number.');
+      return;
+    }
+
+    setAddingStudent(true);
+    try {
+      const studentId = `STU${Math.floor(100 + Math.random() * 900)}`;
+      const payload = {
+        studentId,
+        name: newStudentName.trim(),
+        email: newStudentEmail.trim().toLowerCase(),
+        rollNumber: newStudentRoll.trim().toUpperCase(),
+        section: newStudentSection,
+        department: newStudentDept,
+        semester: '5th Year',
+        enrolledSubjects: newStudentSubjects,
+      };
+
+      await api.createStudent(payload);
+      alert(`✅ Student ${payload.name} (${payload.rollNumber}) added and enrolled in ${newStudentSubjects.length} subject(s)!`);
+      setShowAddModal(false);
+      await loadSubjects();
+    } catch (err) {
+      console.error('Error creating student:', err);
+      alert(`❌ Failed to add student: ${err.message}`);
+    } finally {
+      setAddingStudent(false);
+    }
+  }
+
   const roster = (rosterData?.roster || []).filter(r => {
     const d = getStudentDetails(r.studentId);
     return d.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -154,14 +186,112 @@ export default function StudentRosterPage() {
 
   return (
     <div className="page-enter">
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+          <div className="modal-content" style={{ maxWidth: 540, width: '92%', borderRadius: 'var(--radius)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>👨‍🎓 Add New Student to Roster</h3>
+              <button className="btn btn-icon btn-secondary" onClick={() => setShowAddModal(false)} style={{ borderRadius: '50%', width: 32, height: 32 }}>✕</button>
+            </div>
+
+            <form onSubmit={handleCreateStudent}>
+              <div className="form-group">
+                <label className="form-label">Full Name *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g. Nishchal Mahant"
+                  value={newStudentName}
+                  onChange={e => setNewStudentName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email Address (Used for Student Login) *</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="e.g. nishchal@university.edu"
+                  value={newStudentEmail}
+                  onChange={e => setNewStudentEmail(e.target.value)}
+                  required
+                />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  When this student logs in with this email, their dashboard will immediately show their enrolled courses!
+                </span>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Roll Number *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. 21CS042"
+                    value={newStudentRoll}
+                    onChange={e => setNewStudentRoll(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Section</label>
+                  <select className="form-select" value={newStudentSection} onChange={e => setNewStudentSection(e.target.value)}>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Enroll in Subjects</label>
+                <div style={{ maxHeight: 150, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 8, background: '#fafafa' }}>
+                  {subjects.map(subj => {
+                    const isChecked = newStudentSubjects.includes(subj.subjectCode);
+                    return (
+                      <label key={subj.subjectCode} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 6px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            setNewStudentSubjects(prev =>
+                              isChecked ? prev.filter(c => c !== subj.subjectCode) : [...prev, subj.subjectCode]
+                            );
+                          }}
+                        />
+                        <span style={{ fontSize: '0.82rem' }}><strong>{subj.subjectCode}</strong> - {subj.subjectName}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)} disabled={addingStudent}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={addingStudent}>
+                  {addingStudent ? 'Saving...' : 'Add Student & Enroll'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1 className="page-title">Student Attendance Roster</h1>
           <p className="page-subtitle">Per-subject attendance criteria, threshold safety, margin & recovery analysis</p>
         </div>
-        <button className="btn btn-secondary" onClick={handleExportCSV} id="btn-export-csv">
-          <Download size={15} /> Export CSV Roster
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn btn-primary" onClick={openAddStudentModal}>
+            + Add New Student
+          </button>
+          <button className="btn btn-secondary" onClick={handleExportCSV} id="btn-export-csv">
+            <Download size={15} /> Export CSV Roster
+          </button>
+        </div>
       </div>
 
       {/* Subject Filter Card */}

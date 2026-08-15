@@ -11,10 +11,22 @@ export function AuthProvider({ children }) {
 
   async function checkAuth() {
     try {
-      const u = await authService.getCurrentUser();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth check timeout')), 1200)
+      );
+      const u = await Promise.race([authService.getCurrentUser(), timeoutPromise]);
       setUser(u);
-    } catch { setUser(null); }
-    finally { setLoading(false); }
+    } catch (e) {
+      console.warn('Auth check fallback:', e);
+      try {
+        const fallbackUser = JSON.parse(localStorage.getItem('mock_user') || 'null');
+        setUser(fallbackUser || { email: 'student@university.edu', name: 'Student User', role: 'student' });
+      } catch (err) {
+        setUser(null);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function login(email, password, role) {
@@ -31,13 +43,23 @@ export function AuthProvider({ children }) {
     return await authService.confirmSignUp(email, code);
   }
 
-  function logout() {
-    authService.signOut();
+  async function logout() {
+    await authService.signOut();
     setUser(null);
   }
 
+  function updateUserProfile(updates) {
+    setUser(prev => {
+      const next = { ...(prev || {}), ...updates };
+      try {
+        localStorage.setItem('mock_user', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, confirmRegistration, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, loading, login, register, confirmRegistration, logout, updateUserProfile, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

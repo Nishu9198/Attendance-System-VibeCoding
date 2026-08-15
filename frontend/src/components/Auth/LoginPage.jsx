@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
-import { LogIn, UserPlus, Mail, Lock, User, GraduationCap } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, register, confirmRegistration } = useAuth();
-  const [role, setRole] = useState('teacher');
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +17,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password, role);
+      await login(email, password, 'teacher');
     } catch (err) {
       setError(err.message || 'Login failed.');
     } finally {
@@ -32,23 +30,7 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await register(email, password, name, role);
-      if (role === 'student') {
-        try {
-          const randNum = Math.floor(100 + Math.random() * 900);
-          await api.createStudent({
-            studentId: `STU${randNum}`,
-            name: name.trim(),
-            email: email.trim().toLowerCase(),
-            rollNumber: `21CS${randNum}`,
-            section: 'A',
-            department: 'Computer Science',
-            semester: '5th Year',
-          });
-        } catch (dbErr) {
-          console.error('Error auto-creating student DynamoDB record:', dbErr);
-        }
-      }
+      await register(email, password, name, 'teacher');
       setMode('confirm');
     } catch (err) {
       setError(err.message || 'Registration failed.');
@@ -77,29 +59,7 @@ export default function LoginPage() {
         <div className="auth-logo">
           <div className="auth-logo-icon">📋</div>
           <h2>Presently</h2>
-          <p>AI Facial Recognition Attendance</p>
-        </div>
-
-        {/* Role Selector */}
-        <div className="auth-role-tabs">
-          <button
-            className={`auth-role-tab ${role === 'teacher' ? 'active' : ''}`}
-            onClick={() => setRole('teacher')}
-            type="button"
-          >
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <User size={14} /> Teacher
-            </span>
-          </button>
-          <button
-            className={`auth-role-tab ${role === 'student' ? 'active' : ''}`}
-            onClick={() => setRole('student')}
-            type="button"
-          >
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              <GraduationCap size={14} /> Student
-            </span>
-          </button>
+          <p>Faculty & Attendance Management Platform</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
@@ -107,11 +67,11 @@ export default function LoginPage() {
         {mode === 'login' && (
           <form onSubmit={handleLogin}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label">Faculty Email Address</label>
               <div style={{ position: 'relative' }}>
                 <Mail style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: 'var(--text-muted)' }} />
                 <input id="login-email" type="email" className="form-input" style={{ paddingLeft: 38 }}
-                  placeholder={role === 'teacher' ? 'teacher@university.edu' : 'student@university.edu'}
+                  placeholder="teacher@university.edu"
                   value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
             </div>
@@ -126,14 +86,14 @@ export default function LoginPage() {
             </div>
             <button id="login-submit" type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 4 }} disabled={loading}>
               {loading ? <span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> : <LogIn size={15} />}
-              {loading ? 'Signing in...' : `Sign In as ${role === 'teacher' ? 'Teacher' : 'Student'}`}
+              {loading ? 'Signing in...' : 'Sign In as Faculty'}
             </button>
             <p style={{ textAlign: 'center', marginTop: 10, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Demo mode: any email & password works
             </p>
             <div className="auth-footer">
               Don't have an account?{' '}
-              <a href="#" onClick={e => { e.preventDefault(); setMode('register'); setError(''); }}>Create Account</a>
+              <a href="#" onClick={e => { e.preventDefault(); setMode('register'); setError(''); }}>Create Faculty Account</a>
             </div>
           </form>
         )}
@@ -142,11 +102,11 @@ export default function LoginPage() {
           <form onSubmit={handleRegister}>
             <div className="form-group">
               <label className="form-label">Full Name</label>
-              <input id="register-name" type="text" className="form-input" placeholder="Full name"
+              <input id="register-name" type="text" className="form-input" placeholder="e.g. Dr. Nishchal"
                 value={name} onChange={e => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">Faculty Email</label>
               <input id="register-email" type="email" className="form-input" placeholder="email@university.edu"
                 value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
@@ -156,7 +116,7 @@ export default function LoginPage() {
                 value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
             </div>
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-              {loading ? 'Creating...' : <><UserPlus size={15} /> Create {role === 'teacher' ? 'Teacher' : 'Student'} Account</>}
+              {loading ? 'Creating...' : <><UserPlus size={15} /> Create Faculty Account</>}
             </button>
             <div className="auth-footer">
               Already have an account?{' '}

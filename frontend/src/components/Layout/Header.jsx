@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, AlertTriangle, Send, X, Clock } from 'lucide-react';
+import { Bell, AlertTriangle, Send, X, Clock, User, Edit2, Check } from 'lucide-react';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,15 +16,18 @@ const pageTitles = {
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, login } = useAuth();
-  const isStudent = user?.role === 'student';
+  const { user, updateUserProfile } = useAuth();
 
-  const title = (isStudent ? 'Student: ' : 'Teacher: ') + (pageTitles[location.pathname] || 'Presently');
+  const title = pageTitles[location.pathname] || 'Presently';
 
   const [unmarked, setUnmarked] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [sendingSns, setSendingSns] = useState(false);
   const [snsAlert, setSnsAlert] = useState('');
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState(false);
 
   useEffect(() => {
     loadNotifications();
@@ -52,16 +55,90 @@ export default function Header() {
     }
   }
 
-  function handleToggleRole() {
-    const nextRole = isStudent ? 'teacher' : 'student';
-    login(isStudent ? 'teacher@demo.com' : 'aarav@student.edu', 'password', nextRole);
-    navigate('/');
+  function openProfileModal() {
+    setEditName(user?.name || '');
+    setProfileSuccess(false);
+    setShowProfileModal(true);
+  }
+
+  function handleSaveProfile(e) {
+    e.preventDefault();
+    if (!editName.trim()) return;
+    updateUserProfile({ name: editName.trim() });
+    setProfileSuccess(true);
+    setTimeout(() => {
+      setShowProfileModal(false);
+      setProfileSuccess(false);
+    }, 800);
   }
 
   return (
     <header className="header" id="main-header">
+      {/* Profile Edit Modal */}
+      {showProfileModal && (
+        <div className="modal-overlay" style={{ zIndex: 1200 }}>
+          <div className="modal-content" style={{ maxWidth: 440, width: '90%', borderRadius: 'var(--radius)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <User size={18} color="var(--blue-600)" /> Edit Display Name
+              </h3>
+              <button className="btn btn-icon btn-secondary" onClick={() => setShowProfileModal(false)} style={{ borderRadius: '50%', width: 28, height: 28 }}>✕</button>
+            </div>
+
+            {profileSuccess ? (
+              <div style={{ padding: '12px', background: 'var(--success-bg)', color: 'var(--success)', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontWeight: 600 }}>
+                ✅ Name updated successfully!
+              </div>
+            ) : (
+              <form onSubmit={handleSaveProfile}>
+                <div className="form-group">
+                  <label className="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="Enter your full name"
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 18 }}>
+                  <label className="form-label">Email (Cognito Account)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={user?.email || ''}
+                    disabled
+                    style={{ background: 'var(--bg-card)', color: 'var(--text-muted)' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowProfileModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary">Save Name</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       <h2 className="header-title">{title}</h2>
       <div className="header-actions" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* User Profile Button with Edit Name */}
+        <button
+          className="btn btn-secondary"
+          onClick={openProfileModal}
+          title="Click to edit your display name"
+          style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          <User size={14} color="var(--blue-600)" />
+          <span style={{ fontWeight: 600 }}>{user?.name || 'User'}</span>
+          <Edit2 size={12} style={{ opacity: 0.6 }} />
+        </button>
+
         {/* Notification Bell Button */}
         <button
           className="btn btn-icon btn-secondary"

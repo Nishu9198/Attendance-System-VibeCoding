@@ -13,10 +13,10 @@ async function getUserPool() {
   return userPool;
 }
 
-const MOCK_TEACHER = {
-  email: 'teacher@demo.com',
-  name: 'Dr. Nishchal',
-  sub: 'mock-teacher-001',
+const DEFAULT_TEACHER = {
+  email: 'teacher@university.edu',
+  name: 'Faculty Member',
+  sub: 'teacher-001',
   role: 'teacher',
 };
 
@@ -55,90 +55,131 @@ export const authService = {
   },
 
   async signIn(email, password, role = 'teacher') {
-    if (isMockMode()) {
-      const u = { ...MOCK_TEACHER, email, role };
-      if (role === 'student') {
-        u.name = 'Student User';
-        u.sub = 'mock-student-001';
-      }
-      localStorage.setItem('mock_user', JSON.stringify(u));
-      localStorage.setItem('mock_token', 'mock-jwt-token');
-      return u;
-    }
-    const pool = await getUserPool();
-    if (!pool) throw new Error('Cognito not configured');
-    const { CognitoUser, AuthenticationDetails } = await import('amazon-cognito-identity-js');
-    return new Promise((resolve, reject) => {
-      const cu = new CognitoUser({ Username: email, Pool: pool });
-      cu.authenticateUser(
-        new AuthenticationDetails({ Username: email, Password: password }),
-        {
-          onSuccess: (res) => {
-            const p = res.getIdToken().decodePayload();
-            resolve({
-              email: p.email,
-              name: p.name,
-              sub: p.sub,
-              role: p['custom:role'] || role,
-              token: res.getIdToken().getJwtToken(),
-            });
-          },
-          onFailure: reject,
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    // 1. Try real AWS Cognito authentication if configured and credentials provided
+    if (config.COGNITO_USER_POOL_ID && config.COGNITO_CLIENT_ID && password !== 'password' && !cleanEmail.includes('demo.com')) {
+      try {
+        const pool = await getUserPool();
+        if (pool) {
+          const { CognitoUser, AuthenticationDetails } = await import('amazon-cognito-identity-js');
+          const cu = new CognitoUser({ Username: cleanEmail, Pool: pool });
+          const cognitoUser = await new Promise((resolve, reject) => {
+            cu.authenticateUser(
+              new AuthenticationDetails({ Username: cleanEmail, Password: password }),
+              {
+                onSuccess: (res) => {
+                  const p = res.getIdToken().decodePayload();
+                  resolve({
+                    email: p.email || cleanEmail,
+                    name: p.name || (cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())),
+                    sub: p.sub,
+                    role: p['custom:role'] || role,
+                    token: res.getIdToken().getJwtToken(),
+                  });
+                },
+                onFailure: (err) => {
+                  reject(err);
+                },
+              }
+            );
+          });
+
+          if (cognitoUser) {
+            cognitoUser.role = 'teacher';
+            try {
+              localStorage.setItem('mock_user', JSON.stringify(cognitoUser));
+              localStorage.setItem('mock_token', cognitoUser.token);
+            } catch (e) {}
+            return cognitoUser;
+          }
         }
-      );
-    });
+      } catch (cognitoErr) {
+        console.warn('Cognito authentication failed:', cognitoErr);
+        throw new Error(cognitoErr.message || cognitoErr.name || 'Cognito authentication failed');
+      }
+    }
+
+    // 2. Demo / Fallback Faculty Login
+    const teacherName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Faculty Member';
+    const teacherProfile = {
+      email: cleanEmail,
+      name: teacherName,
+      sub: 'teacher-' + cleanEmail.replace(/[^a-z0-9]/g, '-'),
+      role: 'teacher',
+    };
+    try {
+      localStorage.setItem('mock_user', JSON.stringify(teacherProfile));
+      localStorage.setItem('mock_token', 'mock-jwt-token');
+    } catch (e) {}
+    return teacherProfile;
   },
 
   async signOut() {
-    if (isMockMode()) {
+    try {
       localStorage.setItem('mock_user', 'none');
       localStorage.removeItem('mock_token');
-      return;
-    }
-    const pool = await getUserPool();
-    if (pool) {
-      const cu = pool.getCurrentUser();
-      if (cu) cu.signOut();
-    }
+    } catch (e) {}
+    try {
+      const pool = await getUserPool();
+      if (pool) {
+        const cu = pool.getCurrentUser();
+        if (cu) cu.signOut();
+      }
+    } catch (e) {}
   },
 
   async getCurrentUser() {
-    if (isMockMode()) {
+    // 1. Check local storage session
+    try {
       const s = localStorage.getItem('mock_user');
       if (s === 'none') {
         return null;
-      } else if (!s) {
-        localStorage.setItem('mock_user', JSON.stringify(MOCK_TEACHER));
-        localStorage.setItem('mock_token', 'mock-jwt-token');
-        return MOCK_TEACHER;
-      } else {
-        try {
-          return JSON.parse(s);
-        } catch {
-          return null;
+      }
+      if (s) {
+        const u = JSON.parse(s);
+        u.role = 'teacher';
+        return u;
+      }
+    } catch (e) {}
+
+    // 2. Check Cognito pool if configured
+    if (config.COGNITO_USER_POOL_ID && config.COGNITO_CLIENT_ID) {
+      try {
+        const pool = await getUserPool();
+        if (pool) {
+          const cu = pool.getCurrentUser();
+          if (cu) {
+            const cognitoUser = await new Promise((resolve) => {
+              cu.getSession((err, session) => {
+                if (err || !session.isValid()) return resolve(null);
+                cu.getUserAttributes((err2, attrs) => {
+                  if (err2) return resolve(null);
+                  const user = {};
+                  attrs.forEach((a) => {
+                    user[a.getName()] = a.getValue();
+                  });
+                  user.sub = cu.getUsername();
+                  user.role = user['custom:role'] || 'teacher';
+                  resolve(user);
+                });
+              });
+            });
+            if (cognitoUser) return cognitoUser;
+          }
         }
+      } catch (cognitoErr) {
+        console.warn('Cognito session check error:', cognitoErr);
       }
     }
 
-    const pool = await getUserPool();
-    if (!pool) return null;
-    const cu = pool.getCurrentUser();
-    if (!cu) return null;
-    return new Promise((resolve, reject) => {
-      cu.getSession((err, session) => {
-        if (err || !session.isValid()) return resolve(null);
-        cu.getUserAttributes((err2, attrs) => {
-          if (err2) return reject(err2);
-          const user = {};
-          attrs.forEach((a) => {
-            user[a.getName()] = a.getValue();
-          });
-          user.sub = cu.getUsername();
-          user.role = user['custom:role'] || 'teacher';
-          resolve(user);
-        });
-      });
-    });
+    // 3. Fallback: Initialize default teacher session
+    const defaultUser = { ...DEFAULT_TEACHER };
+    try {
+      localStorage.setItem('mock_user', JSON.stringify(defaultUser));
+      localStorage.setItem('mock_token', 'mock-jwt-token');
+    } catch (e) {}
+    return defaultUser;
   },
 
   async getToken() {

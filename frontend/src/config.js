@@ -8,7 +8,7 @@ const config = {
   AWS_REGION: import.meta.env.VITE_AWS_REGION || 'ap-south-1',
 
   // Feature flags
-  USE_MOCK_DATA: !import.meta.env.VITE_API_URL, // Use mock data if no API URL
+  USE_MOCK_DATA: import.meta.env.VITE_USE_MOCK_DATA === 'true' || !import.meta.env.VITE_API_URL,
 };
 
 export default config;

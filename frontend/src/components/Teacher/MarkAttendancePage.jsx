@@ -96,6 +96,27 @@ export default function MarkAttendancePage() {
     }
   }
 
+  async function handleDirectRegisterFace() {
+    const imageBase64 = getCanvasSnapshot();
+    if (!imageBase64) {
+      alert('⚠️ No image captured from webcam. Please try again.');
+      return;
+    }
+    const currentStudentId = activeStudentId;
+    const currentStudent = students.find(s => s.studentId === currentStudentId);
+    const studentName = currentStudent?.name || currentStudentId;
+
+    try {
+      await api.registerFace(currentStudentId, imageBase64);
+      setStatus(currentStudentId, 'present');
+      stopWebcam();
+      alert(`✅ Official face profile registered successfully for ${studentName}! Student marked present.`);
+    } catch (err) {
+      console.error('Face registration error:', err);
+      alert(`❌ Face registration failed: ${err.message || 'Failed to register face.'}`);
+    }
+  }
+
   async function handleStudentFaceCapture() {
     const imageBase64 = getCanvasSnapshot();
     if (!imageBase64) {
@@ -104,12 +125,25 @@ export default function MarkAttendancePage() {
     }
 
     const currentStudentId = activeStudentId;
+    const currentStudent = students.find(s => s.studentId === currentStudentId);
+    const studentName = currentStudent?.name || currentStudentId;
+
     try {
       const result = await api.verifyFace(currentStudentId, imageBase64);
       if (result.verified) {
         setStatus(currentStudentId, 'present');
         stopWebcam();
         alert(result.message || `✅ Face verified (${result.confidence}% match)! Student marked present.`);
+      } else if (result.isFirstTime) {
+        const registerNow = window.confirm(
+          `📸 No reference face photo found for ${studentName} (${currentStudentId}).\n\nWould you like to register this captured photo as their official reference face now?`
+        );
+        if (registerNow) {
+          await api.registerFace(currentStudentId, imageBase64);
+          setStatus(currentStudentId, 'present');
+          stopWebcam();
+          alert(`✅ Face profile registered successfully for ${studentName}! Student marked present.`);
+        }
       } else {
         alert(result.message || '❌ Face verification failed! Face does not match student profile.');
       }
@@ -439,8 +473,18 @@ export default function MarkAttendancePage() {
               <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <canvas ref={canvasRef} style={{ display: 'none' }} />
-            <div className="modal-actions" style={{ marginTop: 16 }}>
+            <div className="modal-actions" style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" onClick={stopWebcam}>Cancel</button>
+              {!isTeacherCamCheckin && (
+                <button
+                  className="btn btn-secondary"
+                  style={{ borderColor: 'var(--blue-500)', color: 'var(--blue-600)', fontWeight: 600 }}
+                  onClick={handleDirectRegisterFace}
+                  title="Registers this webcam snapshot as the student's official master face profile"
+                >
+                  Register Face Photo
+                </button>
+              )}
               <button className="btn btn-primary" onClick={capturePhoto}>
                 {isTeacherCamCheckin ? 'Verify Teacher Attendance' : 'Capture & Match Face'}
               </button>

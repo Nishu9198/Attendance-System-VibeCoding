@@ -19,80 +19,11 @@ const PERIODS = [
   { period: 11, start: '16:20', end: '17:00' },
 ];
 
-let mockSubjects = [
-  { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304', threshold: 75, editWindowDays: 10, enrolledStudents: ['STU001','STU002','STU003','STU004','STU005','STU006'], totalClasses: 0 },
-  { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201', threshold: 75, editWindowDays: 10, enrolledStudents: ['STU001','STU003','STU004','STU005','STU007','STU008'], totalClasses: 0 },
-  { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B', threshold: 80, editWindowDays: 10, enrolledStudents: ['STU001','STU002','STU006','STU007','STU008'], totalClasses: 0 },
-];
-
-let mockTimetable = {
-  '1': { '2': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' }, '3': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' }, '7': { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B' }, '10': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' } },
-  '2': { '3': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' }, '4': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' }, '8': { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B' } },
-  '3': { '2': { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B' }, '5': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' }, '9': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' } },
-  '4': { '2': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' }, '7': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' }, '10': { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B' } },
-  '5': { '2': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' }, '4': { subjectCode: 'CS503', subjectName: 'Database Systems', className: '5th Year', section: 'A', teacherName: 'Dr. A. Sharma', building: 'Main Academic Block', roomNumber: 'Hall B' }, '8': { subjectCode: 'CS502', subjectName: 'Machine Learning', className: '5th Year', section: 'B', teacherName: 'Dr. S. Rao', building: 'Engineering Block', roomNumber: 'Lab 201' }, '11': { subjectCode: 'CS501', subjectName: 'Cloud Computing', className: '5th Year', section: 'A', teacherName: 'Dr. Nishchal', building: 'Science & Tech Block', roomNumber: 'Room 304' } },
-};
-
-const mockStudents = [
-  { studentId: 'STU001', name: 'Aarav Sharma', rollNumber: '21CS001', email: 'aarav@student.edu', section: 'A' },
-  { studentId: 'STU002', name: 'Priya Patel', rollNumber: '21CS002', email: 'priya@student.edu', section: 'A' },
-  { studentId: 'STU003', name: 'Rahul Kumar', rollNumber: '21CS003', email: 'rahul@student.edu', section: 'A' },
-  { studentId: 'STU004', name: 'Sneha Gupta', rollNumber: '21CS004', email: 'sneha@student.edu', section: 'B' },
-  { studentId: 'STU005', name: 'Vikram Singh', rollNumber: '21CS005', email: 'vikram@student.edu', section: 'B' },
-  { studentId: 'STU006', name: 'Ananya Reddy', rollNumber: '21CS006', email: 'ananya@student.edu', section: 'A' },
-  { studentId: 'STU007', name: 'Karthik Nair', rollNumber: '21CS007', email: 'karthik@student.edu', section: 'B' },
-  { studentId: 'STU008', name: 'Divya Menon', rollNumber: '21CS008', email: 'divya@student.edu', section: 'A' },
-];
-
-// Mock attendance records for STU001 across subjects
-const generateMockAttendance = () => {
-  const records = [];
-  const today = new Date();
-
-  // CS501: Safe (82.4%)
-  for (let i = 0; i < 15; i++) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    records.push({
-      subjectClass: 'CS501#5th Year',
-      recordKey: `${dateStr}#2#STU001`,
-      studentId: 'STU001', date: dateStr, period: '2',
-      status: i === 3 || i === 7 ? 'absent' : i === 5 ? 'late' : 'present',
-      markedBy: 'teacher@demo.com', markedAt: `${dateStr}T09:00:00Z`
-    });
-  }
-
-  // CS502: At Risk / Below (68.5%)
-  for (let i = 0; i < 15; i++) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    records.push({
-      subjectClass: 'CS502#5th Year',
-      recordKey: `${dateStr}#3#STU001`,
-      studentId: 'STU001', date: dateStr, period: '3',
-      status: i === 1 || i === 2 || i === 4 || i === 8 || i === 10 ? 'absent' : 'present',
-      markedBy: 'teacher@demo.com', markedAt: `${dateStr}T09:50:00Z`
-    });
-  }
-
-  // CS503: Critical Shortage (55.0%)
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    records.push({
-      subjectClass: 'CS503#5th Year',
-      recordKey: `${dateStr}#7#STU001`,
-      studentId: 'STU001', date: dateStr, period: '7',
-      status: i % 2 === 0 ? 'absent' : 'present',
-      markedBy: 'teacher@demo.com', markedAt: `${dateStr}T13:00:00Z`
-    });
-  }
-
-  return records;
-};
-
-let mockAttendance = generateMockAttendance();
-let mockTeacherAttendance = [{ date: new Date().toISOString().split('T')[0], status: 'present' }];
+let mockSubjects = [];
+let mockTimetable = {};
+let mockStudents = [];
+let mockAttendance = [];
+let mockTeacherAttendance = [];
 
 // API Call Helper
 async function apiCall(method, path, body = null) {
@@ -125,15 +56,128 @@ async function apiCall(method, path, body = null) {
 function handleMock(method, path, body) {
   return new Promise(resolve => {
     setTimeout(() => {
+      // Sync mock subjects and students with localStorage if available
+      let storedSubs = null;
+      try { storedSubs = JSON.parse(localStorage.getItem('university_subjects') || 'null'); } catch (e) {}
+      if (storedSubs && storedSubs.length > 0) mockSubjects = storedSubs;
+
+      let storedStuds = null;
+      try { storedStuds = JSON.parse(localStorage.getItem('university_students') || 'null'); } catch (e) {}
+      if (storedStuds && storedStuds.length > 0) {
+        storedStuds.forEach(s => {
+          if (!mockStudents.find(m => m.studentId === s.studentId)) mockStudents.push(s);
+        });
+      }
+
+      // Update Student Enrolled Subjects & Profile
+      if (path === '/student/enrolled-subjects' && method === 'POST') {
+        let updatedProfile = {};
+        try {
+          const current = JSON.parse(localStorage.getItem('custom_student_profile') || '{}');
+          updatedProfile = { ...current, ...body };
+          localStorage.setItem('custom_student_profile', JSON.stringify(updatedProfile));
+          localStorage.setItem('mock_user', JSON.stringify(updatedProfile));
+        } catch (e) {}
+
+        const studentId = updatedProfile.studentId || 'STU001';
+        const rollNumber = updatedProfile.rollNumber || '21CS001';
+        const newEnrolled = body.enrolledSubjects || [];
+
+        // Sync with mockSubjects enrolledStudents array
+        mockSubjects.forEach(subj => {
+          let enrolledList = Array.isArray(subj.enrolledStudents) ? [...subj.enrolledStudents] : [];
+          const isEnrolled = newEnrolled.includes(subj.subjectCode);
+          if (isEnrolled && !enrolledList.includes(studentId) && !enrolledList.includes(rollNumber)) {
+            enrolledList.push(studentId);
+          } else if (!isEnrolled) {
+            enrolledList = enrolledList.filter(id => id !== studentId && id !== rollNumber);
+          }
+          subj.enrolledStudents = enrolledList;
+        });
+
+        try { localStorage.setItem('university_subjects', JSON.stringify(mockSubjects)); } catch (e) {}
+
+        resolve({ message: 'Profile and enrolled subjects updated successfully', student: updatedProfile, ...body });
+        return;
+      }
+
       // Student Dashboard Overview
       if (path.startsWith('/student/dashboard') && method === 'GET') {
-        const studentId = 'STU001';
-        const studentSubjects = mockSubjects.filter(s => s.enrolledStudents.includes(studentId));
+        let storedProfile = null;
+        try {
+          storedProfile = JSON.parse(localStorage.getItem('custom_student_profile') || 'null');
+        } catch (e) {}
+
+        let mockUser = null;
+        try {
+          mockUser = JSON.parse(localStorage.getItem('mock_user') || 'null');
+        } catch (e) {}
+
+        const userEmail = (storedProfile?.email || mockUser?.email || '').toLowerCase();
+
+        // Match student from roster if available
+        let matched = mockStudents.find(s => (s.email || '').toLowerCase() === userEmail);
+        if (!matched && storedProfile?.studentId) {
+          matched = mockStudents.find(s => s.studentId === storedProfile.studentId);
+        }
+
+        const studentName = storedProfile?.name || matched?.name || mockUser?.name || 'Student User';
+        const rollNumber = storedProfile?.rollNumber || matched?.rollNumber || '21CS001';
+        const studentId = storedProfile?.studentId || matched?.studentId || 'STU001';
+        const section = storedProfile?.section || matched?.section || 'A';
+        const department = storedProfile?.department || matched?.department || 'Computer Science';
+        const semester = storedProfile?.semester || matched?.semester || '5th Year';
+
+        // Check which subjects student is enrolled in
+        let enrolledCodes = storedProfile?.enrolledSubjects;
+        if (!enrolledCodes) {
+          // Find subjects where teacher enrolled this student
+          const teacherEnrolled = mockSubjects.filter(s =>
+            (s.enrolledStudents || []).includes(studentId) || (s.enrolledStudents || []).includes(rollNumber)
+          );
+          enrolledCodes = teacherEnrolled.map(s => s.subjectCode);
+        }
+
+        const facultyMapping = storedProfile?.facultyMapping || {};
+
+        const student = {
+          studentId,
+          name: studentName,
+          email: userEmail || 'student@university.edu',
+          rollNumber,
+          section,
+          department,
+          semester,
+          enrolledSubjects: enrolledCodes,
+          facultyMapping,
+        };
+
+        const studentSubjects = mockSubjects.filter(s => enrolledCodes.includes(s.subjectCode));
 
         let totalAttended = 0, totalClassesCount = 0;
         const subjectStats = studentSubjects.map(subj => {
           const sc = `${subj.subjectCode}#${subj.className}`;
-          const recs = mockAttendance.filter(r => r.subjectClass === sc && r.studentId === studentId);
+          let recs = mockAttendance.filter(r => r.subjectClass === sc && r.studentId === studentId);
+
+          if (recs.length === 0) {
+            const today = new Date();
+            for (let i = 0; i < 10; i++) {
+              const d = new Date(today);
+              d.setDate(d.getDate() - i * 2);
+              const dateStr = d.toISOString().split('T')[0];
+              recs.push({
+                subjectClass: sc,
+                recordKey: `${dateStr}#2#${studentId}`,
+                studentId,
+                date: dateStr,
+                period: '2',
+                status: i === 2 || i === 6 ? 'absent' : i === 4 ? 'late' : 'present',
+                markedBy: 'teacher@demo.com',
+                markedAt: `${dateStr}T09:00:00Z`
+              });
+            }
+          }
+
           const present = recs.filter(r => r.status === 'present').length;
           const late = recs.filter(r => r.status === 'late').length;
           const absent = recs.filter(r => r.status === 'absent').length;
@@ -143,7 +187,7 @@ function handleMock(method, path, body) {
           totalAttended += attended;
           totalClassesCount += total;
 
-          const rate = total > 0 ? Math.round((attended / total) * 100 * 10) / 10 : 0;
+          const rate = total > 0 ? Math.round((attended / total) * 100 * 10) / 10 : 100;
           const threshold = subj.threshold || 75;
 
           const margin = threshold > 0 ? Math.max(0, Math.floor((attended * 100 / threshold) - total)) : 999;
@@ -157,50 +201,83 @@ function handleMock(method, path, body) {
           else if (rate < threshold) status = 'risk';
           else if (rate < threshold + 10) status = 'ok';
 
+          const facultyInfo = facultyMapping[subj.subjectCode] || {};
+
           return {
             subjectCode: subj.subjectCode,
             subjectName: subj.subjectName,
             className: subj.className,
-            teacherName: subj.teacherName || 'Dr. Nishchal',
-            building: subj.building || 'Science Block',
-            roomNumber: subj.roomNumber || 'Room 304',
+            teacherName: facultyInfo.teacherName || subj.teacherName || 'Faculty',
+            building: subj.building || 'Main Block',
+            roomNumber: subj.roomNumber || 'Room 101',
             present, absent, late, total, rate, threshold, margin, classesNeeded, status,
-            history: recs.sort((a,b) => b.date.localeCompare(a.date)),
+            history: recs.sort((a, b) => b.date.localeCompare(a.date)),
           };
         });
 
-        const overallRate = totalClassesCount > 0 ? Math.round((totalAttended / totalClassesCount) * 100 * 10) / 10 : 0;
+        const overallRate = totalClassesCount > 0 ? Math.round((totalAttended / totalClassesCount) * 100 * 10) / 10 : 100;
         const shortageSubjects = subjectStats.filter(s => s.rate < s.threshold);
 
+        // Filter timetable to ONLY include the student's enrolled subjects
+        const filteredTimetable = {};
+        Object.entries(mockTimetable).forEach(([day, periods]) => {
+          filteredTimetable[day] = {};
+          Object.entries(periods).forEach(([p, slot]) => {
+            if (enrolledCodes.includes(slot.subjectCode)) {
+              filteredTimetable[day][p] = slot;
+            }
+          });
+        });
+
         resolve({
-          student: mockStudents.find(s => s.studentId === studentId),
+          student,
           overallRate,
           totalClasses: totalClassesCount,
           totalAttended,
           shortageSubjectsCount: shortageSubjects.length,
           subjectStats,
-          timetable: mockTimetable,
+          timetable: filteredTimetable,
         });
       }
 
       // Student Shortage SNS Alert
       else if (path === '/student/trigger-sns-alert' && method === 'POST') {
+        let storedProfile = null;
+        try { storedProfile = JSON.parse(localStorage.getItem('custom_student_profile') || 'null'); } catch (e) {}
+        const studentEmail = storedProfile?.email || 'student@university.edu';
         resolve({
-          message: 'AWS SNS Email & SMS Shortage Alert dispatched to student aarav@student.edu!',
+          message: `AWS SNS Email & SMS Shortage Alert dispatched to student ${studentEmail}!`,
           sent: true,
           messageId: 'student-sns-' + Math.random().toString(36).substr(2, 9),
         });
       }
 
-      // Timetable
+      // Timetable GET
       else if (path === '/timetable' && method === 'GET') {
+        let mockUser = null;
+        try { mockUser = JSON.parse(localStorage.getItem('mock_user') || 'null'); } catch (e) {}
+        const isStudent = mockUser?.role === 'student';
+
+        let enrolledCodes = null;
+        if (isStudent) {
+          try {
+            const profile = JSON.parse(localStorage.getItem('custom_student_profile') || 'null');
+            enrolledCodes = profile?.enrolledSubjects || [];
+          } catch (e) {}
+        }
+
+        const filteredTT = {};
         const slots = [];
         Object.entries(mockTimetable).forEach(([day, periods]) => {
+          filteredTT[day] = {};
           Object.entries(periods).forEach(([p, slot]) => {
-            slots.push({ slotKey: `${day}#${p}`, ...slot });
+            if (!isStudent || (enrolledCodes && enrolledCodes.includes(slot.subjectCode))) {
+              filteredTT[day][p] = slot;
+              slots.push({ slotKey: `${day}#${p}`, ...slot });
+            }
           });
         });
-        resolve({ timetable: mockTimetable, slots });
+        resolve({ timetable: filteredTT, slots, role: isStudent ? 'student' : 'teacher' });
       } else if (path === '/timetable' && method === 'POST') {
         const { dayOrder, period, ...rest } = body;
         if (!mockTimetable[String(dayOrder)]) mockTimetable[String(dayOrder)] = {};
@@ -319,6 +396,37 @@ function handleMock(method, path, body) {
       // Students
       else if (path === '/students' && method === 'GET') {
         resolve({ students: mockStudents });
+      } else if (path === '/students' && method === 'POST') {
+        const studentId = body.studentId || `STU${Math.floor(100 + Math.random() * 900)}`;
+        const rollNumber = body.rollNumber || `21CS${Math.floor(100 + Math.random() * 900)}`;
+        const newStudent = {
+          studentId,
+          name: body.name || 'New Student',
+          email: (body.email || '').toLowerCase(),
+          rollNumber,
+          section: body.section || 'A',
+          department: body.department || 'Computer Science',
+          semester: body.semester || '5th Year',
+          enrolledSubjects: body.enrolledSubjects || [],
+        };
+        mockStudents.push(newStudent);
+        try {
+          const stored = JSON.parse(localStorage.getItem('university_students') || '[]');
+          stored.push(newStudent);
+          localStorage.setItem('university_students', JSON.stringify(stored));
+        } catch (e) {}
+
+        // Automatically enroll this student into the subjects selected by the teacher
+        const selectedSubjects = body.enrolledSubjects || [];
+        mockSubjects.forEach(subj => {
+          if (selectedSubjects.includes(subj.subjectCode)) {
+            if (!subj.enrolledStudents) subj.enrolledStudents = [];
+            if (!subj.enrolledStudents.includes(studentId)) subj.enrolledStudents.push(studentId);
+          }
+        });
+        try { localStorage.setItem('university_subjects', JSON.stringify(mockSubjects)); } catch (e) {}
+
+        resolve({ message: 'Student created and enrolled successfully', student: newStudent });
       } else if (path.startsWith('/students/') && method === 'GET') {
         const id = path.split('/')[2];
         resolve({ student: mockStudents.find(s => s.studentId === id) });
@@ -420,6 +528,7 @@ function handleMock(method, path, body) {
 export const api = {
   // Student Portal APIs
   getStudentDashboard: () => apiCall('GET', '/student/dashboard'),
+  updateStudentEnrolledSubjects: (data) => apiCall('POST', '/student/enrolled-subjects', data),
   triggerStudentSNSAlert: () => apiCall('POST', '/student/trigger-sns-alert'),
 
   // Timetable

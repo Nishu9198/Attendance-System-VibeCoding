@@ -77,3 +77,25 @@ resource "aws_s3_bucket_public_access_block" "photos" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# --- Automatically Upload Frontend Build to S3 ---
+resource "aws_s3_object" "frontend_files" {
+  for_each = fileset("${path.module}/../frontend/dist", "**/*")
+
+  bucket       = aws_s3_bucket.frontend.id
+  key          = each.value
+  source       = "${path.module}/../frontend/dist/${each.value}"
+  etag         = filemd5("${path.module}/../frontend/dist/${each.value}")
+  content_type = lookup({
+    "html" = "text/html",
+    "js"   = "application/javascript",
+    "css"  = "text/css",
+    "json" = "application/json",
+    "svg"  = "image/svg+xml",
+    "png"  = "image/png",
+    "jpg"  = "image/jpeg",
+    "jpeg" = "image/jpeg",
+    "ico"  = "image/x-icon"
+  }, split(".", each.value)[length(split(".", each.value)) - 1], "application/octet-stream")
+}
+

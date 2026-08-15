@@ -42,57 +42,10 @@ def get_user_info(event):
 
 
 def get_timetable(event):
-    """Get timetable matching teacher schedule for enrolled subjects."""
+    """Get faculty weekly timetable grid."""
     try:
-        role, sub, user_key = get_user_info(event)
-        
-        if role == "teacher":
-            # Teachers see all scheduled teaching slots
-            result = table.scan()
-            all_slots = result.get("Items", [])
-            # Filter slots for teacher or global teacher schedule
-            slots = [s for s in all_slots if not str(s.get("teacherId", "")).startswith("student_")]
-        else:
-            # Student view: Find student's enrolled subjects
-            student_id = sub if sub.startswith("STU") else "STU001"
-            
-            # Get student's rollNumber if available
-            try:
-                stud_rec = students_table.get_item(Key={"studentId": student_id}).get("Item", {})
-                roll_num = stud_rec.get("rollNumber", "")
-            except Exception:
-                roll_num = ""
-
-            # Scan subjects to find which subjects this student is enrolled in
-            subj_res = subjects_table.scan()
-            all_subjects = subj_res.get("Items", [])
-            
-            enrolled_codes = set()
-            for s in all_subjects:
-                enrolled_list = s.get("enrolledStudents", [])
-                if not enrolled_list or student_id in enrolled_list or (roll_num and roll_num in enrolled_list):
-                    enrolled_codes.add(s.get("subjectCode"))
-
-            # Scan master timetable and filter only for the student's enrolled subjects
-            result = table.scan()
-            all_slots = result.get("Items", [])
-            
-            # Include teacher slots for enrolled subjects
-            slots = [
-                s for s in all_slots 
-                if s.get("subjectCode") in enrolled_codes and not str(s.get("teacherId", "")).startswith("student_")
-            ]
-            
-            # If no teacher slots exist yet, fallback to default student schedule
-            if not slots:
-                slots = [
-                    {"slotKey": "1#1", "subjectCode": "CS501", "subjectName": "Cloud Computing & AWS", "className": "5th Year", "section": "A", "roomNumber": "Room 101"},
-                    {"slotKey": "1#3", "subjectCode": "CS502", "subjectName": "Deep Learning & AI", "className": "5th Year", "section": "A", "roomNumber": "Lab 3"},
-                    {"slotKey": "2#2", "subjectCode": "CS503", "subjectName": "Distributed Systems", "className": "5th Year", "section": "B", "roomNumber": "Hall B"},
-                    {"slotKey": "3#1", "subjectCode": "CS501", "subjectName": "Cloud Computing & AWS", "className": "5th Year", "section": "A", "roomNumber": "Room 101"},
-                    {"slotKey": "4#4", "subjectCode": "CS502", "subjectName": "Deep Learning & AI", "className": "5th Year", "section": "A", "roomNumber": "Lab 3"},
-                    {"slotKey": "5#2", "subjectCode": "CS503", "subjectName": "Distributed Systems", "className": "5th Year", "section": "B", "roomNumber": "Hall B"},
-                ]
+        result = table.scan()
+        slots = result.get("Items", [])
 
         # Organize into grid structure
         grid = {}
@@ -112,7 +65,7 @@ def get_timetable(event):
                     "endTime": slot.get("endTime", ""),
                 }
 
-        return _response(200, {"timetable": grid, "slots": slots, "role": role})
+        return _response(200, {"timetable": grid, "slots": slots, "role": "teacher"})
     except Exception as e:
         return _response(500, {"error": str(e)})
 

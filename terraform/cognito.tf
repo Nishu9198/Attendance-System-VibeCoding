@@ -1,5 +1,5 @@
 # ============================================================
-# Amazon Cognito - Two-role Authentication (Teacher / Student)
+# Amazon Cognito - Faculty & Teacher Authentication
 # Always Free: 50,000 MAUs
 # ============================================================
 
@@ -69,17 +69,11 @@ resource "aws_cognito_user_pool" "main" {
   mfa_configuration = "OFF"
 }
 
-# --- Cognito Groups ---
+# --- Cognito Group ---
 resource "aws_cognito_user_group" "teachers" {
   name         = "Teachers"
   user_pool_id = aws_cognito_user_pool.main.id
-  description  = "Teacher users who manage attendance"
-}
-
-resource "aws_cognito_user_group" "students" {
-  name         = "Students"
-  user_pool_id = aws_cognito_user_pool.main.id
-  description  = "Student users who view their attendance"
+  description  = "Teacher and faculty users who manage attendance"
 }
 
 # --- Cognito App Client (SPA - no secret) ---

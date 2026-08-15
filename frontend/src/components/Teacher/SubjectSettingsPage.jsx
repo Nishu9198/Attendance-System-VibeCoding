@@ -2,22 +2,13 @@ import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { Plus, Trash2, Edit, Save, Shield, Settings, Check } from 'lucide-react';
 
-const DEFAULT_STUDENTS = [
-  { studentId: 'STU001', name: 'Aarav Sharma', rollNumber: '21CS001', email: 'aarav@university.edu', section: 'A' },
-  { studentId: 'STU002', name: 'Priya Patel', rollNumber: '21CS002', email: 'priya@university.edu', section: 'A' },
-  { studentId: 'STU003', name: 'Rahul Kumar', rollNumber: '21CS003', email: 'rahul@university.edu', section: 'A' },
-  { studentId: 'STU004', name: 'Sneha Gupta', rollNumber: '21CS004', email: 'sneha@university.edu', section: 'B' },
-  { studentId: 'STU005', name: 'Vikram Singh', rollNumber: '21CS005', email: 'vikram@university.edu', section: 'B' },
-  { studentId: 'STU006', name: 'Ananya Reddy', rollNumber: '21CS006', email: 'ananya@university.edu', section: 'A' },
-  { studentId: 'STU007', name: 'Karthik Nair', rollNumber: '21CS007', email: 'karthik@university.edu', section: 'B' },
-  { studentId: 'STU008', name: 'Divya Menon', rollNumber: '21CS008', email: 'divya@university.edu', section: 'A' },
-];
-
 export default function SubjectSettingsPage() {
   const [subjects, setSubjects] = useState([]);
-  const [students, setStudents] = useState(DEFAULT_STUDENTS);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingCode, setEditingCode] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const [form, setForm] = useState({
     subjectCode: '',
     subjectName: '',
@@ -27,7 +18,7 @@ export default function SubjectSettingsPage() {
     roomNumber: '1207',
     threshold: 75,
     editWindowDays: 10,
-    enrolledStudents: DEFAULT_STUDENTS.map(s => s.studentId),
+    enrolledStudents: [],
   });
 
   useEffect(() => {
@@ -41,11 +32,10 @@ export default function SubjectSettingsPage() {
         api.getStudents().catch(() => ({ students: [] })),
       ]);
       const subjList = subjData.subjects || [];
-      const studList = (studData.students && studData.students.length > 0) ? studData.students : DEFAULT_STUDENTS;
+      const studList = studData.students || [];
       setSubjects(subjList);
       setStudents(studList);
 
-      // Auto-populate form enrolledStudents with all student IDs
       setForm(prev => ({
         ...prev,
         enrolledStudents: prev.enrolledStudents.length > 0 
@@ -70,7 +60,7 @@ export default function SubjectSettingsPage() {
       roomNumber: '1207',
       threshold: 75,
       editWindowDays: 10,
-      enrolledStudents: (students.length > 0 ? students : DEFAULT_STUDENTS).map(s => s.studentId),
+      enrolledStudents: students.map(s => s.studentId),
     });
   }
 
@@ -80,9 +70,7 @@ export default function SubjectSettingsPage() {
       building: subj.building || '',
       roomNumber: subj.roomNumber || '',
       ...subj,
-      enrolledStudents: (subj.enrolledStudents && subj.enrolledStudents.length > 0) 
-        ? subj.enrolledStudents 
-        : (students.length > 0 ? students : DEFAULT_STUDENTS).map(s => s.studentId),
+      enrolledStudents: subj.enrolledStudents || [],
     });
   }
 
@@ -94,9 +82,6 @@ export default function SubjectSettingsPage() {
         : [...prev.enrolledStudents, studentId],
     }));
   }
-
-  const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null);
 
   async function handleSaveSubject(e) {
     e.preventDefault();
